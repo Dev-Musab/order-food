@@ -1,51 +1,29 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FOODS_BY_SEARCH_URL, FOODS_BY_TAG_URL, FOODS_TAGS_URL, FOODS_URL, FOOD_BY_ID_URL } from 'src/app/shared/constants/urls';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CartService } from 'src/app/services/cart.service';
+import { FoodService } from 'src/app/services/food.service';
 import { Food } from 'src/app/shared/models/Food';
-import { Tag } from 'src/app/shared/models/Tag';
-import { sample_foods, sample_tags } from 'src/data';
-// import { FOODS_BY_SEARCH_URL, FOODS_BY_TAG_URL, FOODS_TAGS_URL, FOODS_URL, FOOD_BY_ID_URL } from '../shared/constants/urls';
-// import { Food } from '../shared/models/Food';
-// import { Tag } from '../shared/models/Tag';
-
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'app-food-page',
+  templateUrl: './food-page.component.html',
+  styleUrls: ['./food-page.component.css']
 })
-export class FoodService {
+export class FoodPageComponent implements OnInit {
+  food!: Food;
+  constructor(activatedRoute:ActivatedRoute, foodService:FoodService,
+    private cartService:CartService, private router: Router) {
+    activatedRoute.params.subscribe((params) => {
+      if(params.id)
+      foodService.getFoodById(params.id).subscribe(serverFood => {
+        this.food = serverFood;
+      });
+    })
+   }
 
-  // constructor() { }
-  constructor(private http:HttpClient) { }
-
-  // getAll(): Food[] {
-  //   return sample_foods;
-  getAll(): Observable<Food[]> {
-    return this.http.get<Food[]>(FOODS_URL);
+  ngOnInit(): void {
   }
-
-  getAllFoodsBySearchTerm(searchTerm: string) {
-    // return this.getAll().filter(food => food.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    return this.http.get<Food[]>(FOODS_BY_SEARCH_URL + searchTerm);
+  addToCart(){
+    this.cartService.addToCart(this.food);
+    this.router.navigateByUrl('/cart-page');
   }
-
-  // getAllTags(): Tag[] {
-  //   return sample_tags;
-  getAllTags(): Observable<Tag[]> {
-    return this.http.get<Tag[]>(FOODS_TAGS_URL);
-  }
-
-  // getAllFoodsByTag(tag: string): Food[] {
-  getAllFoodsByTag(tag: string): Observable<Food[]> {
-    return tag === "All" ?
-      this.getAll() :
-      // this.getAll().filter(food => food.tags?.includes(tag));
-      this.http.get<Food[]>(FOODS_BY_TAG_URL + tag);
-  }
-
-  // getFoodById(foodId:string):Food{
-  //   return this.getAll().find(food => food.id == foodId) ?? new Food();
-  getFoodById(foodId:string):Observable<Food>{
-    return this.http.get<Food>(FOOD_BY_ID_URL + foodId);
-  }
-
 }

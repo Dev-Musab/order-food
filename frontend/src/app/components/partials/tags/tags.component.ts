@@ -9,7 +9,6 @@ import { Tag } from 'src/app/shared/models/Tag';
 export class TagsComponent implements OnInit {
   tags?:Tag[];
   constructor(foodService:FoodService) {
-
     foodService.getAllTags().subscribe(serverTags => {
       this.tags = serverTags;
     });
